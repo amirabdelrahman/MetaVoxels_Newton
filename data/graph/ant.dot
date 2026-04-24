@@ -1,0 +1,49 @@
+digraph rover {
+   
+
+   v [label="control"];
+
+   j2 [label="elbow", orient=0,limMin=-50,limMax=50];
+   j3 [label="elbow", orient=0,limMin=-50,limMax=50];
+   j4 [label="elbow", orient=0,limMin=-50,limMax=50];
+   j5 [label="elbow", orient=0,limMin=-50,limMax=50];
+
+   j6 [label="elbow", orient=1,limMin=30,limMax=100];
+   j7 [label="elbow", orient=1,limMin=30,limMax=100];
+   j8 [label="elbow", orient=1,limMin=-100,limMax=-30];
+   j9 [label="elbow", orient=1,limMin=-100,limMax=-30];
+
+   v4 [label="rigid"];
+   v5 [label="rigid"];
+   v6 [label="rigid"];
+   v7 [label="rigid"];
+
+   e1 [label="end"];
+   e2 [label="end"];
+   e3 [label="end"];
+   e4 [label="end"];
+   
+
+   v -> j2 [label=0];
+   v -> j3 [label=1];
+   v -> j4 [label=2];
+   v -> j5 [label=3];
+
+   j2 -> j6 [label=0];
+   j3 -> j7 [label=1];
+   j4 -> j8 [label=2];
+   j5 -> j9 [label=3];
+
+
+   j6 -> v4 [label=0];
+   j7 -> v5 [label=1];
+   j8 -> v6 [label=2];
+   j9 -> v7 [label=3];
+
+   v4 -> e1 [label=0];
+   v5 -> e2 [label=1];
+   v6 -> e3 [label=2];
+   v7 -> e4 [label=3];
+ 
+
+}
