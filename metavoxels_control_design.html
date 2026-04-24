@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Control design: phase-coded oscillators for MetaVoxels co-design</title>
+<style>
+  :root {
+    --teal:  #1c5c61;
+    --peach: #fa6e70;
+    --dark:  #020227;
+    --purple:#380152;
+    --paper: #ffffff;
+    --ink:   #020227;
+    --mute:  #595973;
+    --rule:  rgba(2,2,39,0.12);
+    --rule-strong: rgba(2,2,39,0.28);
+  }
+
+  html, body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: Palatino, "Palatino Linotype", "Book Antiqua", "URW Palladio L", serif;
+    font-size: 15.5px;
+    line-height: 1.55;
+    margin: 0;
+    padding: 0;
+  }
+  .page { max-width: 1040px; margin: 0 auto; padding: 56px 56px 96px; }
+
+  .kicker {
+    font-variant: small-caps;
+    letter-spacing: 0.14em;
+    color: var(--teal);
+    font-size: 13px;
+    font-weight: 700;
+  }
+  h1 {
+    font-size: 42px;
+    line-height: 1.08;
+    margin: 4px 0 4px;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    color: var(--dark);
+  }
+  h1 em { color: var(--peach); font-style: italic; }
+  h2 {
+    font-size: 22px;
+    margin: 44px 0 10px;
+    color: var(--purple);
+    font-weight: 600;
+  }
+  h2 .num {
+    color: var(--peach);
+    font-variant-numeric: tabular-nums;
+    margin-right: 10px;
+    font-weight: 400;
+  }
+  p { margin: 10px 0; }
+  p.lede { font-size: 18px; color: var(--mute); max-width: 68ch; margin-top: 14px; }
+  .rule { height: 1px; background: var(--rule); margin: 10px 0 0; }
+  .rule.strong { background: var(--rule-strong); height: 2px; }
+
+  code, .mono {
+    font-family: "Courier New", monospace;
+    font-size: 13px;
+  }
+  code {
+    background: rgba(56,1,82,0.07);
+    padding: 1px 5px;
+    border-radius: 2px;
+    color: var(--purple);
+  }
+
+  /* --- pills row --- */
+  .pills {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 14px; margin-top: 20px;
+  }
+  .pill {
+    border: 1.5px solid var(--rule);
+    padding: 16px; border-radius: 2px;
+  }
+  .pill .tag {
+    font-size: 11px; letter-spacing: 0.18em;
+    font-variant: small-caps; color: var(--peach);
+    font-weight: 700;
+  }
+  .pill h4 {
+    margin: 6px 0; font-size: 16px;
+    color: var(--dark); font-weight: 600;
+  }
+  .pill p { margin: 0; font-size: 13px; color: var(--mute); line-height: 1.5; }
+
+  /* --- equation strip --- */
+  .eq {
+    margin: 14px 0;
+    padding: 16px 20px;
+    background: rgba(28,92,97,0.06);
+    border-left: 3px solid var(--teal);
+    font-family: Palatino, serif;
+    font-size: 16.5px;
+    color: var(--dark);
+  }
+  .eq .sub { font-size: 12.5px; color: var(--mute); display: block; margin-top: 4px; font-style: italic; }
+
+  /* --- math grid --- */
+  .mathgrid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 18px; margin-top: 14px;
+  }
+  .mathgrid .card {
+    border: 1px solid var(--rule);
+    padding: 14px 16px 16px; border-radius: 2px;
+  }
+  .mathgrid .card h4 {
+    margin: 0 0 6px; color: var(--teal); font-size: 14px;
+    font-weight: 700; letter-spacing: 0.02em;
+  }
+  .mathgrid .card .formula {
+    font-family: Palatino, serif;
+    font-size: 15px;
+    margin: 8px 0;
+    color: var(--dark);
+  }
+  .mathgrid .card .note {
+    font-size: 12.5px; color: var(--mute); font-style: italic;
+  }
+
+  /* --- comparison table --- */
+  table.compare {
+    border-collapse: collapse; width: 100%;
+    margin-top: 12px; font-size: 14px;
+  }
+  .compare th, .compare td {
+    text-align: left; padding: 12px 14px;
+    border-bottom: 1px solid var(--rule); vertical-align: top;
+  }
+  .compare thead th {
+    border-bottom: 2px solid var(--dark);
+    font-variant: small-caps; letter-spacing: 0.1em;
+    color: var(--dark); font-size: 12.5px;
+  }
+  .compare tr.chosen td { background: rgba(28,92,97,0.06); font-weight: 600; }
+  .compare tr.chosen td:first-child {
+    border-left: 3px solid var(--peach);
+    padding-left: 11px;
+  }
+  .mark {
+    display: inline-block; padding: 2px 8px;
+    border-radius: 2px; font-size: 11px;
+    font-weight: 700; letter-spacing: 0.08em;
+  }
+  .mark.good { color: var(--teal); border: 1px solid var(--teal); }
+  .mark.meh  { color: var(--mute); border: 1px solid var(--rule-strong); }
+  .mark.bad  { color: var(--peach); border: 1px solid var(--peach); }
+
+  /* --- reason grid --- */
+  .reasons {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 16px 28px; margin-top: 14px;
+  }
+  .reasons > div { border-top: 2px solid var(--peach); padding-top: 10px; }
+  .reasons h4 { margin: 0 0 4px; color: var(--dark); font-size: 15.5px; font-weight: 700; }
+  .reasons p { margin: 0; font-size: 13.5px; color: var(--mute); }
+
+  /* --- task matrix --- */
+  .matrix {
+    display: grid; grid-template-columns: 170px 1fr;
+    column-gap: 20px; row-gap: 12px; margin-top: 14px;
+  }
+  .matrix .label {
+    color: var(--teal); font-weight: 700;
+    font-size: 14px; letter-spacing: 0.04em;
+  }
+  .matrix .desc { color: var(--dark); font-size: 14px; }
+  .matrix .desc em { color: var(--purple); font-style: normal; font-weight: 600; }
+
+  /* --- phase visualizer --- */
+  .phasebox {
+    margin-top: 16px;
+    padding: 18px 22px 10px;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    background: #fff;
+  }
+
+  footer {
+    margin-top: 60px; padding-top: 20px;
+    border-top: 1px solid var(--rule);
+    font-size: 12.5px; color: var(--mute);
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="kicker">Control design note, rev. 2</div>
+  <h1>Phase-coded oscillators for <em>shape &times; control</em><br>co-design on MetaVoxels.</h1>
+  <p class="lede">
+    Each actuator is assigned one slot from a three-entry table of phase offsets.
+    At simulation time every actuator drives a sinusoidal target with its
+    assigned phase. One integer per actuator, fixed for the whole rollout,
+    shared across locomotion, climbing, and grasping. The flat RL action space
+    grows by a single multiplicative factor K when this option is turned on,
+    not by a per-timestep control loop.
+  </p>
+  <div class="rule strong"></div>
+
+  <h2><span class="num">01</span>What changed, and why</h2>
+  <p>
+    The previous draft of this file proposed a library of named whole-body
+    poses (GAIT_A, GAIT_B, BRACE, GRASP). That is a reasonable choice for a
+    fixed-morphology robot, but it is the wrong shape for co-design. When the
+    morphology is itself being searched over, a named pose like GAIT_A only
+    makes sense if the body it was written for still exists. Evolving the
+    shape invalidates the library.
+  </p>
+  <p>
+    The right abstraction is one that attaches to each <em>actuator</em>
+    individually, emerges coordination from the relative timings, and makes
+    no assumption about body topology. Phase-coded oscillators do exactly
+    that. They are also the control primitive used in most of the voxel robot
+    and soft robot literature for this reason.
+  </p>
+
+  <h2><span class="num">02</span>The model</h2>
+  <div class="eq">
+    target<sub>i</sub>(t) &nbsp;=&nbsp; A &middot; sin( 2&pi; ( f<sub>i</sub> &middot; t &nbsp;+&nbsp; &varphi;<sub>i</sub> ) )
+    <span class="sub">
+      A is a global amplitude. Each actuator i chooses its own phase &varphi;<sub>i</sub>
+      and frequency multiplier f<sub>i</sub> from a small discrete table.
+    </span>
+  </div>
+  <p>
+    The default table has K = 3 phases and L = 1 frequency, so each actuator
+    picks one of three slots. This is the minimum that produces non-trivial
+    group behavior. Raising K to four or L to two is a one-line change when
+    the task needs it.
+  </p>
+
+  <h2><span class="num">03</span>How the action space grows</h2>
+  <div class="mathgrid">
+    <div class="card">
+      <h4>Shape only</h4>
+      <div class="formula">|A| &nbsp;=&nbsp; 1 &nbsp;+&nbsp; T &middot; n&sup3;</div>
+      <div class="note">
+        T voxel types, n&sup3; grid cells, plus a STOP action.
+      </div>
+    </div>
+    <div class="card">
+      <h4>Shape &times; control</h4>
+      <div class="formula">
+        |A| &nbsp;=&nbsp; 1 &nbsp;+&nbsp; T<sub>passive</sub> &middot; n&sup3; &nbsp;+&nbsp; T<sub>actuator</sub> &middot; n&sup3; &middot; KL
+      </div>
+      <div class="note">
+        Only actuator placements are multiplied by KL. Passive types are
+        untouched.
+      </div>
+    </div>
+  </div>
+  <p>
+    For n = 7, T<sub>passive</sub> = 2, T<sub>actuator</sub> = 2, K = 3, L = 1:
+  </p>
+  <div class="eq">
+    1 &nbsp;+&nbsp; 2 &middot; 343 &nbsp;+&nbsp; 2 &middot; 343 &middot; 3 &nbsp;=&nbsp; 1 &nbsp;+&nbsp; 686 &nbsp;+&nbsp; 2058 &nbsp;=&nbsp; <b>2745</b> actions
+    <span class="sub">
+      Compared to 1373 without control choice. A 2x jump, not exponential.
+      MaskablePPO handles this range fine.
+    </span>
+  </div>
+
+  <h2><span class="num">04</span>What each phase table means</h2>
+  <div class="phasebox">
+    <svg viewBox="0 0 900 170" width="100%" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="gt" x1="0" x2="1">
+          <stop offset="0" stop-color="#1c5c61" stop-opacity="0.0"/>
+          <stop offset="0.5" stop-color="#1c5c61" stop-opacity="0.45"/>
+          <stop offset="1" stop-color="#1c5c61" stop-opacity="0.0"/>
+        </linearGradient>
+      </defs>
+      <g font-family="Palatino, serif" font-size="12">
+        <!-- axis -->
+        <line x1="40" y1="85" x2="860" y2="85" stroke="#020227" stroke-width="1"/>
+        <text x="866" y="89" fill="#020227">t</text>
+
+        <!-- phi=0 wave -->
+        <path d="
+          M 40 85
+          Q 80 35, 120 85 T 200 85 T 280 85 T 360 85 T 440 85
+          T 520 85 T 600 85 T 680 85 T 760 85 T 840 85
+        " fill="none" stroke="#1c5c61" stroke-width="2"/>
+
+        <!-- phi=1/3 wave -->
+        <path d="
+          M 40 85
+          Q 66.7 85, 93.3 35 T 146.7 85 T 200 135 T 253.3 85 T 306.7 35
+          T 360 85 T 413.3 135 T 466.7 85 T 520 35 T 573.3 85
+          T 626.7 135 T 680 85 T 733.3 35 T 786.7 85 T 840 135
+        " fill="none" stroke="#fa6e70" stroke-width="2"/>
+
+        <!-- phi=2/3 wave -->
+        <path d="
+          M 40 85
+          Q 66.7 85, 93.3 135 T 146.7 85 T 200 35 T 253.3 85 T 306.7 135
+          T 360 85 T 413.3 35 T 466.7 85 T 520 135 T 573.3 85
+          T 626.7 35 T 680 85 T 733.3 135 T 786.7 85 T 840 35
+        " fill="none" stroke="#380152" stroke-width="2"/>
+
+        <!-- legend -->
+        <g transform="translate(40, 148)">
+          <rect x="0"   y="-8" width="14" height="3" fill="#1c5c61"/>
+          <text x="22" y="-4" fill="#020227">slot 0 &nbsp;&nbsp;&varphi; = 0</text>
+          <rect x="180" y="-8" width="14" height="3" fill="#fa6e70"/>
+          <text x="202" y="-4" fill="#020227">slot 1 &nbsp;&nbsp;&varphi; = 1/3</text>
+          <rect x="380" y="-8" width="14" height="3" fill="#380152"/>
+          <text x="402" y="-4" fill="#020227">slot 2 &nbsp;&nbsp;&varphi; = 2/3</text>
+        </g>
+      </g>
+    </svg>
+  </div>
+  <p>
+    Three sine waves shifted by one third of a period each. Actuators in the
+    same slot move together. Actuators in different slots are offset by
+    120 or 240 degrees. That is already enough to produce rhythmic group
+    patterns.
+  </p>
+
+  <h2><span class="num">05</span>Why one scheme covers three tasks</h2>
+  <div class="matrix">
+    <div class="label">Locomotion</div>
+    <div class="desc">
+      Assign alternating slots to diagonal actuator pairs. Pairs in <em>slot 0</em>
+      lift while pairs in <em>slot 1</em> push. Reverse the pattern after half a
+      period and the body translates.
+    </div>
+    <div class="label">Climbing</div>
+    <div class="desc">
+      Put a load-bearing subset in <em>slot 0</em> and reach with the rest in
+      <em>slot 2</em>. The phase offset guarantees at least part of the body is
+      always anchored.
+    </div>
+    <div class="label">Grasping</div>
+    <div class="desc">
+      Assign every actuator to the <em>same slot</em>. They contract in unison,
+      closing around an object. Add a tiny phase delta on the fingertips for a
+      whip-like catch.
+    </div>
+  </div>
+  <p>
+    The RL agent is never told which task it is solving. It just searches
+    over phase assignments that happen to score well under the rollout
+    reward. Different assignments emerge for different bodies.
+  </p>
+
+  <h2><span class="num">06</span>Alternatives considered</h2>
+  <table class="compare">
+    <thead>
+      <tr>
+        <th style="width:24%">Approach</th>
+        <th>Action-space growth</th>
+        <th>Works across bodies</th>
+        <th>Interpretable</th>
+        <th>Verdict</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Named whole-body poses</td>
+        <td><span class="mark good">constant</span></td>
+        <td><span class="mark bad">no</span></td>
+        <td><span class="mark good">yes</span></td>
+        <td>Breaks whenever the morphology changes. Bad fit for co-design.</td>
+      </tr>
+      <tr>
+        <td>Continuous torques per actuator per step</td>
+        <td><span class="mark bad">huge</span></td>
+        <td><span class="mark good">yes</span></td>
+        <td><span class="mark bad">no</span></td>
+        <td>Hard to mask, hard to read, expensive to explore.</td>
+      </tr>
+      <tr>
+        <td>Central pattern generators (learnable)</td>
+        <td><span class="mark meh">medium</span></td>
+        <td><span class="mark good">yes</span></td>
+        <td><span class="mark meh">partial</span></td>
+        <td>Good but introduces a second optimization layer.</td>
+      </tr>
+      <tr>
+        <td>DMPs / learned motor primitives</td>
+        <td><span class="mark meh">medium</span></td>
+        <td><span class="mark meh">partial</span></td>
+        <td><span class="mark good">yes</span></td>
+        <td>Powerful but requires warm examples per body.</td>
+      </tr>
+      <tr class="chosen">
+        <td>Phase-coded oscillator slots <span class="mono">(K=3, L=1)</span></td>
+        <td><span class="mark good">linear in KL</span></td>
+        <td><span class="mark good">yes</span></td>
+        <td><span class="mark good">yes</span></td>
+        <td>Minimal, general, trivially maskable, survives shape changes.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2><span class="num">07</span>Why this is a good fit for MaskablePPO</h2>
+  <div class="reasons">
+    <div>
+      <h4>One integer per actuator</h4>
+      <p>The slot is a discrete choice made at placement time. It lives next to the shape choice in the flat action index.</p>
+    </div>
+    <div>
+      <h4>Masking is a slice</h4>
+      <p>Disabling actuator type t's slot m is a contiguous range of n&sup3; action ids. The layout helper computes the offsets.</p>
+    </div>
+    <div>
+      <h4>No per-timestep control head</h4>
+      <p>The policy decides the slot once per actuator and never again. Control does not enter the rollout loop as an action.</p>
+    </div>
+    <div>
+      <h4>Replicates at zero cost</h4>
+      <p>Copying the bank and DOF index list to N worlds is a buffer copy. The MuJoCo-Warp solver does the rest.</p>
+    </div>
+    <div>
+      <h4>Clean reward shaping</h4>
+      <p>Forward speed, upright cosine, height delta and more come straight out of the RolloutStats object.</p>
+    </div>
+    <div>
+      <h4>Exploration stays honest</h4>
+      <p>Only K<sup>N</sup> distinct phase patterns exist for N actuators. Random exploration actually samples the space.</p>
+    </div>
+  </div>
+
+  <h2><span class="num">08</span>Interface summary</h2>
+  <ul class="mono" style="line-height:1.8; color:var(--dark); padding-left: 22px;">
+    <li>OscillatorBank(num_oscillators, phase_slots, freq_slots, base_freq_hz, amplitude_rad)</li>
+    <li>bank.assign(osc_idx, phase_bucket, freq_bucket)</li>
+    <li>bank.assign_from_bucket_ids([b0, b1, ...])</li>
+    <li>bank.evaluate(t_seconds) &rarr; np.array of target angles</li>
+    <li>SinusoidalJointController(model, control, bank, dof_indices)</li>
+    <li>controller.push(t_seconds) &rarr; writes joint_target_pos on GPU</li>
+    <li>CoDesignActionLayout(grid_side, num_types, actuator_types, num_buckets)</li>
+    <li>encode_codesign_action(layout, is_stop, type_id, x, y, z, bucket_id)</li>
+    <li>decode_codesign_action(layout, action) &rarr; (is_stop, t, x, y, z, bucket_id)</li>
+    <li>run_oscillatory_rollout(example, controller, duration_s) &rarr; RolloutStats</li>
+  </ul>
+
+  <h2><span class="num">09</span>What is not in this file</h2>
+  <p>
+    The RL side of the co-design loop. MaskablePPO, the env, the reward
+    shaping, and the eval callbacks live in a separate module. The control
+    library only provides the <em>physics-side</em> primitives: the
+    oscillator bank, the joint controller, and the action-index helpers.
+    That separation keeps the sim and the learning loop independently
+    testable.
+  </p>
+  <p>
+    A follow-up note will walk through a modernized MaskablePPO setup
+    (recent tricks: action-masking in the loss, on-policy critic targets
+    with variance reduction, DAPO-style length bias fixes, token-level
+    advantage normalization, plus entropy scheduling suited to discrete
+    action spaces with large masks). That note will reference the layout
+    object above so masks and actions stay in sync.
+  </p>
+
+  <footer>
+    Palette: teal #1c5c61, peach #fa6e70, dark #020227, purple #380152.
+    Typeface: Palatino.
+  </footer>
+</div>
+</body>
+</html>

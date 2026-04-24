@@ -966,32 +966,32 @@ class RobotZoo:
         j3 = r.addJoint(link=[v, 1], jType="elbow", orient=0, limits=(-80, 80))
         j4 = r.addJoint(link=[v, 2], jType="elbow", orient=0, limits=(-80, 80))
         j5 = r.addJoint(link=[v, 3], jType="elbow", orient=0, limits=(-80, 80))
-        j6 = r.addJoint(link=[v, 4], jType="elbow", orient=0, limits=(-180, 180))
-        j7 = r.addJoint(link=[v, 5], jType="elbow", orient=0, limits=(-180, 180))
+        # j6 = r.addJoint(link=[v, 4], jType="elbow", orient=0, limits=(-180, 180))
+        # j7 = r.addJoint(link=[v, 5], jType="elbow", orient=0, limits=(-180, 180))
 
         j8 = r.addJoint(link=[j2, 0], jType="elbow", orient=1, limits=(-80, 80))
         j9 = r.addJoint(link=[j3, 1], jType="elbow", orient=1, limits=(-80, 80))
         j10 = r.addJoint(link=[j4, 2], jType="elbow", orient=1, limits=(-80, 80))
         j11 = r.addJoint(link=[j5, 3], jType="elbow", orient=1, limits=(-80, 80))
-        j12 = r.addJoint(link=[j6, 4], jType="elbow", orient=1, limits=(-180, 180))
-        j13 = r.addJoint(link=[j7, 5], jType="elbow", orient=1, limits=(-180, 180))
+        # j12 = r.addJoint(link=[j6, 4], jType="elbow", orient=1, limits=(-180, 180))
+        # j13 = r.addJoint(link=[j7, 5], jType="elbow", orient=1, limits=(-180, 180))
 
 
         v4 = r.addVoxel(link=[j8, 0], vType="rigid")
         v5 = r.addVoxel(link=[j9, 1], vType="rigid")
         v6 = r.addVoxel(link=[j10, 2], vType="rigid")
         v7 = r.addVoxel(link=[j11, 3], vType="rigid")
-        v8 = r.addVoxel(link=[j12, 4], vType="rigid")
-        v9 = r.addVoxel(link=[j13, 5], vType="rigid")
+        # v8 = r.addVoxel(link=[j12, 4], vType="rigid")
+        # v9 = r.addVoxel(link=[j13, 5], vType="rigid")
 
         r.addEnd(link=[v4, 0])
         r.addEnd(link=[v5, 1])
         r.addEnd(link=[v6, 2])
         r.addEnd(link=[v7, 3])
-        r.addEnd(link=[v8, 4])
-        r.addEnd(link=[v9, 5])
+        # r.addEnd(link=[v8, 4])
+        # r.addEnd(link=[v9, 5])
 
-        r.fix(v)
+        # r.fix(v)
 
         r.finalize()
 
