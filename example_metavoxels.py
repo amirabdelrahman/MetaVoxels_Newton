@@ -69,7 +69,7 @@ class Example:
                  enable_self_collision: bool = ENABLE_SELF_COLLISION,
                  bank_assignment=None,
                  base_freq_hz: float = 1.2,
-                 amplitude_deg: float = 40.0):
+                 amplitude_deg: float = 55.0):
         self.fps = 60
         self.frame_dt = 1.0 / self.fps
         self.sim_substeps = 10
@@ -86,7 +86,8 @@ class Example:
         zoo = RobotZoo(builder=builder, size=1.0, usd_path=usd_path)
         self.robot = zoo.create_ant1(
             name=self.robot_name,
-            pos=wp.vec3(0.0, 0.0, 5.0),
+            # Spawn close to ground so actuation is visible right away.
+            pos=wp.vec3(0.0, 0.0, 0.8),
         )
 
         if not enable_self_collision:
@@ -94,7 +95,8 @@ class Example:
             print(f"[metavoxels] dropped {removed} robot self-collision pairs")
 
         if USE_OSCILLATOR_CONTROL:
-            configured = set_pd_gains(builder, kp=60.0, kd=5.0)
+            # Use stiffer gains, consistent with working robot examples.
+            configured = set_pd_gains(builder, kp=400.0, kd=30.0)
             print(f"[metavoxels] PD gains on {configured} revolute DOFs")
 
         self.model = builder.finalize()
